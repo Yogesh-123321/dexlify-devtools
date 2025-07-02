@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
 import Dashboard from "./pages/Dashboard";
-import JsonFormatter from "./pages/JsonFormatter";
-import RegexTester from "./pages/RegexTester";
+import JsonFormatter from "@/pages/JsonFormatter";
+import RegexTester from "@/pages/RegexTester";
 import MarkdownEditor from "./pages/MarkdownEditor";
 import ApiTester from "./pages/ApiTester";
 import SnippetVault from "./pages/SnippetVault";
