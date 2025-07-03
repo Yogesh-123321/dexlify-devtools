@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 const APITester = () => {
   const [method, setMethod] = useState("GET");
   const [url, setUrl] = useState("");
+  const [queryParams, setQueryParams] = useState("");
   const [headers, setHeaders] = useState("");
   const [body, setBody] = useState("");
   const [response, setResponse] = useState("");
@@ -18,16 +19,28 @@ const APITester = () => {
     setError("");
 
     try {
+      let finalUrl = url;
+      if (queryParams.trim()) {
+        try {
+          const queryObj = JSON.parse(queryParams);
+          const searchParams = new URLSearchParams(queryObj).toString();
+          finalUrl += "?" + searchParams;
+        } catch (err) {
+          setError("❌ Invalid Query Params JSON");
+          return;
+        }
+      }
+
       const options = {
         method,
         headers: headers ? JSON.parse(headers) : {},
       };
 
-      if (method !== "GET" && body) {
+      if (method !== "GET" && method !== "DELETE" && body) {
         options.body = body;
       }
 
-      const res = await fetch(url, options);
+      const res = await fetch(finalUrl, options);
       const text = await res.text();
 
       try {
@@ -37,7 +50,7 @@ const APITester = () => {
         setResponse(text);
       }
     } catch (err) {
-      setError(err.message);
+      setError(`❌ ${err.message}`);
     }
   };
 
@@ -58,8 +71,8 @@ const APITester = () => {
                 <option>GET</option>
                 <option>POST</option>
                 <option>PUT</option>
-                <option>DELETE</option>
                 <option>PATCH</option>
+                <option>DELETE</option>
               </select>
             </div>
 
@@ -71,6 +84,17 @@ const APITester = () => {
                 placeholder="https://jsonplaceholder.typicode.com/posts"
               />
             </div>
+          </div>
+
+          <div>
+            <Label className="text-white">Query Params (JSON)</Label>
+            <Textarea
+              rows={2}
+              value={queryParams}
+              onChange={(e) => setQueryParams(e.target.value)}
+              placeholder='{"search": "book", "limit": 10}'
+              className="bg-gray-800 text-white"
+            />
           </div>
 
           <div>
@@ -91,14 +115,13 @@ const APITester = () => {
                 rows={5}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder='{"title": "new value"}'
+                placeholder='{"title": "foo", "body": "bar"}'
                 className="bg-gray-800 text-white"
               />
             </div>
           )}
 
-
-          <Button onClick={sendRequest} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={sendRequest} >
             Send Request
           </Button>
         </CardContent>
@@ -108,7 +131,7 @@ const APITester = () => {
         <CardContent className="p-4">
           <h3 className="text-lg font-semibold mb-2">Response</h3>
           {error ? (
-            <p className="text-red-400">{error}</p>
+            <p className="text-red-400 whitespace-pre-wrap">{error}</p>
           ) : (
             <pre className="whitespace-pre-wrap">{response}</pre>
           )}
