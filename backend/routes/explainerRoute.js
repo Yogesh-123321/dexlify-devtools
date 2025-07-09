@@ -1,12 +1,16 @@
-const express = require("express");
-const { spawn } = require("child_process");
+import express from "express";
+import { spawn } from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
+
 const router = express.Router();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 router.post("/", (req, res) => {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: "Code is required" });
 
-  const python = spawn("python", ["explain.py"], { cwd: __dirname + "/.." });
+  const python = spawn("python", ["explain.py"], { cwd: path.join(__dirname, "..") });
 
   let result = "", error = "";
 
@@ -32,4 +36,4 @@ router.post("/", (req, res) => {
   python.stdin.end();
 });
 
-module.exports = router;
+export default router;

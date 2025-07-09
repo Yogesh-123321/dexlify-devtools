@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const Snippet = require('../models/Snippet');
+import express from "express";
+import Snippet from "../models/Snippet.js";
 
-// Create a new snippet
+const router = express.Router();
+
 router.post('/', async (req, res) => {
   try {
     const snippet = new Snippet(req.body);
@@ -13,7 +13,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all snippets
 router.get('/', async (req, res) => {
   try {
     const snippets = await Snippet.find().sort({ createdAt: -1 });
@@ -22,7 +21,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// DELETE /api/snippets/:id
+
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Snippet.findByIdAndDelete(req.params.id);
@@ -33,5 +32,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-
-module.exports = router;
+export default router;
