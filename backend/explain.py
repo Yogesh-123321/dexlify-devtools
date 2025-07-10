@@ -6,7 +6,7 @@ tokenizer = RobertaTokenizer.from_pretrained("Salesforce/codet5-base-multi-sum")
 model = T5ForConditionalGeneration.from_pretrained("Salesforce/codet5-base-multi-sum")
 
 try:
-    input_json = sys.stdin.read()
+    input_json = input()
     data = json.loads(input_json)
     code = data.get("code", "")
 
