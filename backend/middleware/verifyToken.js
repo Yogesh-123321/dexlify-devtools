@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 
-// 🔒 Middleware for routes that require authentication
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
@@ -17,7 +16,7 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
-// 🧪 Middleware that accepts both guest and logged-in users
+// ✅ For detecting user without enforcing login
 export const detectUser = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -27,10 +26,10 @@ export const detectUser = (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.userId = decoded.id;
     } catch {
-      req.userId = "guest"; // fallback for invalid token
+      req.userId = null;
     }
   } else {
-    req.userId = "guest"; // fallback for missing token
+    req.userId = null;
   }
 
   next();

@@ -7,30 +7,33 @@ import {
   CodeIcon,
   MenuIcon,
   XIcon,
-  PaletteIcon
+  PaletteIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { to: "/", label: "Dashboard", icon: <HomeIcon className="w-4 h-4" /> },
-  { to: "/json", label: "JSON Formatter", icon: <CodeIcon className="w-4 h-4" /> },
-  { to: "/regex", label: "Regex Tester", icon: <CodeIcon className="w-4 h-4" /> },
-  { to: "/markdown", label: "Markdown Editor", icon: <NotebookTextIcon className="w-4 h-4" /> },
-  { to: "/snippets", label: "Snippet Vault", icon: <FileTextIcon className="w-4 h-4" /> },
-  { to: "/explain", label: "Code Explainer", icon: <BrainIcon className="w-4 h-4" /> },
-  { to: "/api", label: "API Tester", icon: <FlaskConicalIcon className="w-4 h-4" /> },
-  { to: "/color", label: "Color Picker", icon: <PaletteIcon className="w-4 h-4" /> },
-  { to: "/theme", label: "Theme Generator", icon: <PaletteIcon className="w-4 h-4" /> },
+  { to: "/", label: "Dashboard", icon: <HomeIcon className="w-5 h-5" /> },
+  { to: "/json", label: "JSON Formatter", icon: <CodeIcon className="w-5 h-5" /> },
+  { to: "/regex", label: "Regex Tester", icon: <CodeIcon className="w-5 h-5" /> },
+  { to: "/markdown", label: "Markdown Editor", icon: <NotebookTextIcon className="w-5 h-5" /> },
+  { to: "/snippets", label: "Snippet Vault", icon: <FileTextIcon className="w-5 h-5" /> },
+  { to: "/explain", label: "Code Explainer", icon: <BrainIcon className="w-5 h-5" /> },
+  { to: "/api", label: "API Tester", icon: <FlaskConicalIcon className="w-5 h-5" /> },
+  { to: "/color", label: "Color Picker", icon: <PaletteIcon className="w-5 h-5" /> },
+  { to: "/theme", label: "Theme Generator", icon: <PaletteIcon className="w-5 h-5" /> },
 ];
 
 export default function Sidebar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const renderLinks = () => (
-    <nav className="flex flex-col gap-2">
+    <nav className="flex flex-col gap-1">
       {navLinks.map(({ to, label, icon }) => {
         const isActive = location.pathname === to;
         return (
@@ -39,14 +42,14 @@ export default function Sidebar() {
             to={to}
             onClick={() => setMobileOpen(false)}
             className={cn(
-              "inline-flex items-center justify-start gap-3 rounded-md text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring px-4 py-2 transform",
+              "flex items-center gap-3 text-sm font-medium px-4 py-2 rounded-md transition-all",
               isActive
-                ? "bg-primary text-primary-foreground scale-105 shadow-md"
-                : "bg-zinc-800 text-white hover:bg-primary/90 hover:text-black"
+                ? "bg-primary text-primary-foreground shadow"
+                : "hover:bg-primary/80 hover:text-black text-white bg-zinc-800"
             )}
           >
             {icon}
-            {label}
+            {!collapsed && <span>{label}</span>}
           </Link>
         );
       })}
@@ -54,21 +57,31 @@ export default function Sidebar() {
   );
 
   const logoBlock = (
-    <div className="flex justify-center items-center py-4">
-      <img
-        src="/assets/dexlify-logo-modern.png"
-        alt="Dexlify Logo"
-        className="w-36 h-auto object-contain drop-shadow-md"
-      />
+    <div className="flex items-center justify-between px-4 py-3">
+      {!collapsed && (
+        <img
+          src="/assets/dexlify-logo-modern.png"
+          alt="Dexlify Logo"
+          className="w-36 object-contain drop-shadow"
+        />
+      )}
+      <button onClick={() => setCollapsed(!collapsed)} className="text-white">
+        {collapsed ? <ChevronRight /> : <ChevronLeft />}
+      </button>
     </div>
   );
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 h-screen bg-black border-r border-primary p-5 flex-col gap-8 shadow-lg">
+      <aside
+        className={cn(
+          "hidden md:flex h-screen bg-black border-r border-primary shadow-lg flex-col transition-all duration-300",
+          collapsed ? "w-20" : "w-64"
+        )}
+      >
         {logoBlock}
-        {renderLinks()}
+        <div className="flex-1 overflow-y-auto px-2 py-2">{renderLinks()}</div>
       </aside>
 
       {/* Mobile Top Bar */}

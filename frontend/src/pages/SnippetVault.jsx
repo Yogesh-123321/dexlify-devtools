@@ -4,6 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { toast } from "sonner";
+import { checkGuestLimit } from "@/lib/utils";
+import useAuthStore from "@/store/useAuthStore";
 
 const SnippetVault = () => {
   const [title, setTitle] = useState("");
@@ -11,6 +14,8 @@ const SnippetVault = () => {
   const [snippets, setSnippets] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedSnippet, setSelectedSnippet] = useState(null);
+
+  const { user } = useAuthStore();
 
   useEffect(() => {
     fetchSnippets();
@@ -22,11 +27,23 @@ const SnippetVault = () => {
       setSnippets(res.data);
     } catch (error) {
       console.error("Error fetching snippets:", error);
+      toast.error("❌ Failed to load snippets.");
     }
   };
 
   const saveSnippet = async () => {
-    if (!title.trim() || !code.trim()) return;
+    if (!title.trim() || !code.trim()) {
+      toast.error("❌ Title and code cannot be empty.");
+      return;
+    }
+
+    if (!user) {
+      const allowed = checkGuestLimit("snippetVaultUsage");
+      if (!allowed) {
+        return toast.error("🚫 Guest limit reached. Please sign up to save more snippets.");
+      }
+    }
+
     try {
       const res = await axios.post("http://localhost:5000/api/snippets", {
         title,
@@ -35,8 +52,10 @@ const SnippetVault = () => {
       setSnippets([res.data, ...snippets]);
       setTitle("");
       setCode("");
+      toast.success("✅ Snippet saved successfully!");
     } catch (error) {
       console.error("Error saving snippet:", error);
+      toast.error("❌ Failed to save snippet.");
     }
   };
 
@@ -45,8 +64,10 @@ const SnippetVault = () => {
     try {
       await axios.delete(`http://localhost:5000/api/snippets/${selectedSnippet._id}`);
       setSnippets((prev) => prev.filter((s) => s._id !== selectedSnippet._id));
+      toast.success("🗑️ Snippet deleted successfully!");
     } catch (error) {
       console.error("Error deleting snippet:", error);
+      toast.error("❌ Failed to delete snippet.");
     } finally {
       setShowConfirm(false);
       setSelectedSnippet(null);
@@ -86,6 +107,7 @@ const SnippetVault = () => {
         </div>
       )}
 
+      {/* Snippet creation */}
       <Card className="bg-gray-900 text-white">
         <CardContent className="p-4 space-y-4">
           <h2 className="text-xl font-semibold">Save a Snippet</h2>
@@ -102,12 +124,16 @@ const SnippetVault = () => {
             onChange={(e) => setCode(e.target.value)}
             className="bg-gray-800 text-white"
           />
-          <Button onClick={saveSnippet} className="bg-green-600 hover:bg-green-700">
+          <Button
+            onClick={saveSnippet}
+            className="bg-green-600 hover:bg-green-700"
+          >
             Save
           </Button>
         </CardContent>
       </Card>
 
+      {/* Snippet list */}
       <div className="space-y-4">
         {snippets.map((snippet) => (
           <Card key={snippet._id} className="bg-gray-800 text-white">
@@ -116,7 +142,7 @@ const SnippetVault = () => {
               <pre className="flex-grow whitespace-pre-wrap">{snippet.code}</pre>
               <div className="mt-4">
                 <Button
-                  
+                  className="bg-red-600 hover:bg-red-700"
                   onClick={() => {
                     setSelectedSnippet(snippet);
                     setShowConfirm(true);
@@ -129,7 +155,6 @@ const SnippetVault = () => {
           </Card>
         ))}
       </div>
-
     </div>
   );
 };

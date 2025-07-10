@@ -3,21 +3,34 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { checkGuestLimit } from "@/lib/utils";
+import useAuthStore from "@/store/useAuthStore"; // assuming you're already using this
 
 const JsonFormatter = () => {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
 
-  const handleFormat = () => {
-    try {
-      const parsed = JSON.parse(input);
-      const pretty = JSON.stringify(parsed, null, 2);
-      setOutput(pretty);
-      toast.success("✨ JSON formatted!");
-    } catch (err) {
-      toast.error("❌ Invalid JSON.");
+  const { user } = useAuthStore(); // ✅ Move this line up to top if not already present
+
+const handleFormat = () => {
+  // 🔐 Guest check
+  if (!user) {
+    const allowed = checkGuestLimit("jsonFormatterUsage");
+    if (!allowed) {
+      return toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
     }
-  };
+  }
+
+  try {
+    const parsed = JSON.parse(input);
+    const pretty = JSON.stringify(parsed, null, 2);
+    setOutput(pretty);
+    toast.success("✨ JSON formatted!");
+  } catch (err) {
+    toast.error("❌ Invalid JSON.");
+  }
+};
+
 
   const handleMinify = () => {
   try {
@@ -59,7 +72,7 @@ const JsonFormatter = () => {
           <div className="flex gap-3 flex-wrap">
             <Button onClick={handleFormat}>✨ Format</Button>
             <Button onClick={handleMinify}>📦 Minify</Button>
-            <Button onClick={handleReset} variant="destructive">
+            <Button onClick={handleReset} >
               🔄 Reset
             </Button>
           </div>
