@@ -30,7 +30,7 @@ const CodeExplainer = () => {
     setExplanation("");
 
     try {
-      const res = await axios.post("http://13.201.227.67:5500/api/explainer", {
+      const res = await axios.post("http://localhost:5500/api/explainer", {
         code,
       });
 

@@ -30,6 +30,6 @@ app.use("/api/auth", authRoutes);
 mongoose.connect(process.env.MONGO_URL || "mongodb://localhost:27017/dexlify")
   .then(() => {
     console.log("✅ MongoDB connected");
-    app.listen(PORT,'0.0.0.0', () => console.log(`🚀 Server running on http://13.201.227.67:${PORT}`));
+    app.listen(PORT,'0.0.0.0', () => console.log(`🚀 Server running on http://localhost:${PORT}`));
   })
   .catch(err => console.error("MongoDB connection error:", err));
