@@ -27,7 +27,7 @@ app.use("/api/explainer", explainerRoute);
 app.use("/api/jsonformatter", jsonFormatterRoutes);
 app.use("/api/auth", authRoutes);
 
-mongoose.connect(process.env.MONGO_URL || "mongodb://localhost:27017/dexlify")
+mongoose.connect(process.env.MONGO_URL)
   .then(() => {
     console.log("✅ MongoDB connected");
     app.listen(PORT,'0.0.0.0', () => console.log(`🚀 Server running on http://localhost:${PORT}`));
