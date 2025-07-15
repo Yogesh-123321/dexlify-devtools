@@ -30,7 +30,7 @@ const CodeExplainer = () => {
     setExplanation("");
 
     try {
-      const res = await axios.post("http://localhost:5500/api/explainer", {
+      const res = await axios.post("https://dexlify-devtools.onrender.com/api/explainer", {
         code,
       });
 

@@ -23,7 +23,7 @@ const SnippetVault = () => {
 
   const fetchSnippets = async () => {
     try {
-      const res = await axios.get("http://localhost:5500/api/snippets");
+      const res = await axios.get("https://dexlify-devtools.onrender.com/api/snippets");
       setSnippets(res.data);
     } catch (error) {
       console.error("Error fetching snippets:", error);
@@ -45,7 +45,7 @@ const SnippetVault = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:5500/api/snippets", {
+      const res = await axios.post("https://dexlify-devtools.onrender.com/api/snippets", {
         title,
         code,
       });
@@ -62,7 +62,7 @@ const SnippetVault = () => {
   const confirmDelete = async () => {
     if (!selectedSnippet) return;
     try {
-      await axios.delete(`http://localhost:5500/api/snippets/${selectedSnippet._id}`);
+      await axios.delete(`https://dexlify-devtools.onrender.com/api/snippets/${selectedSnippet._id}`);
       setSnippets((prev) => prev.filter((s) => s._id !== selectedSnippet._id));
       toast.success("🗑️ Snippet deleted successfully!");
     } catch (error) {
