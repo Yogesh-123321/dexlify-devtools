@@ -24,9 +24,15 @@ router.post("/", detectUser, async (req, res) => {
     }
   }
 
-  const python = spawn("python", ["explain.py"], {
-    cwd: path.join(__dirname, ".."),
-  });
+  const python = spawn("python3", ["explain.py"], {
+  cwd: path.join(__dirname, ".."),
+});
+
+python.on("error", (err) => {
+  console.error("❌ Failed to start Python process:", err.message);
+  return res.status(500).json({ error: "Failed to start Python process" });
+});
+
 
   let result = "", error = "";
 
