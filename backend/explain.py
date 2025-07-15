@@ -1,26 +1,30 @@
-from transformers import RobertaTokenizer, T5ForConditionalGeneration
-import sys
+import ast
 import json
+import sys
 
-tokenizer = RobertaTokenizer.from_pretrained("Salesforce/codet5-base-multi-sum")
-model = T5ForConditionalGeneration.from_pretrained("Salesforce/codet5-base-multi-sum")
+def explain_code(code):
+    try:
+        tree = ast.parse(code)
+        func_names = [node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+        class_names = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
 
-try:
-    input_json = input()
-    data = json.loads(input_json)
-    code = data.get("code", "")
+        explanation = []
 
-    if not code:
-        print(json.dumps({"error": "No code provided"}))
-        sys.exit()
+        if func_names:
+            explanation.append(f"The code defines function(s): {', '.join(func_names)}.")
+        if class_names:
+            explanation.append(f"It includes class(es): {', '.join(class_names)}.")
+        if not explanation:
+            explanation.append("No functions or classes found. Likely a script with simple statements.")
 
-    prompt = f"summarize: {code}"
-    input_ids = tokenizer(prompt, return_tensors="pt").input_ids
-    output_ids = model.generate(input_ids, max_length=64)
-    explanation = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+        return {"explanation": " ".join(explanation)}
 
-    print(json.dumps({"explanation": explanation}))
+    except Exception as e:
+        return {"error": str(e)}
 
-except Exception as e:
-    print(json.dumps({"error": str(e)}))
-    sys.exit(1)
+if __name__ == "__main__":
+    input_data = json.loads(sys.stdin.read())
+    code = input_data.get("code", "")
+    output = explain_code(code)
+    print(json.dumps(output))
+
