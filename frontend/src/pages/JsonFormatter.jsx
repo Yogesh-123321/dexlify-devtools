@@ -3,56 +3,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { checkGuestLimit, getGuestUsage, getOrCreateGuestId } from "@/lib/utils";
+import { checkGuestLimit, getGuestUsage } from "@/lib/utils";
 import useAuthStore from "@/store/useAuthStore";
 import axios from "axios";
 
 const JsonFormatter = () => {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [history, setHistory] = useState([]);
   const [guestCount, setGuestCount] = useState(0);
-  const { user } = useAuthStore();
 
-  const fetchHistory = async () => {
-    try {
-      const userId = user ? user._id : "guest";
-      const res = await axios.get(`https://dexlify-devtools.onrender.com/api/jsonformatter?user=${userId}`);
-      setHistory(res.data);
-    } catch (err) {
-      console.error("❌ Failed to fetch JSON history:", err);
-    }
-  };
+  const { user, token } = useAuthStore();
 
   useEffect(() => {
-    fetchHistory();
     if (!user) {
       const { count } = getGuestUsage("jsonFormatterUsage");
       setGuestCount(count);
     }
   }, [user]);
 
-  const saveFormattedJson = async (formatted, mode = "formatted") => {
-    try {
-      const userId = user ? user._id : "guest";
-      const res = await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
-        input,
-        output: formatted,
-        mode,
-        userId,
-      });
-      setHistory((prev) => [res.data, ...prev]);
-      toast.success("💾 Saved to history!");
-    } catch (err) {
-      if (err.response?.status === 403) {
-        toast.error("🔒 Guest limit reached. Please log in to save more.");
-      } else {
-        toast.error("❌ Failed to save JSON.");
-      }
-    }
-  };
-
-  const handleFormat = () => {
+  const handleFormat = async () => {
+    // 🔐 Guest check
     if (!user) {
       const allowed = checkGuestLimit("jsonFormatterUsage");
       if (!allowed) {
@@ -66,22 +36,39 @@ const JsonFormatter = () => {
       const parsed = JSON.parse(input);
       const pretty = JSON.stringify(parsed, null, 2);
       setOutput(pretty);
-      saveFormattedJson(pretty, "formatted");
       toast.success("✨ JSON formatted!");
+
+      await saveEntry(parsed, pretty, "format");
     } catch (err) {
       toast.error("❌ Invalid JSON.");
     }
   };
 
-  const handleMinify = () => {
+  const handleMinify = async () => {
     try {
       const parsed = JSON.parse(input);
       const minified = JSON.stringify(parsed);
       setOutput(minified);
-      saveFormattedJson(minified, "minified");
       toast.success("📦 JSON minified!");
+
+      await saveEntry(parsed, minified, "minify");
     } catch (err) {
-      toast.error("❌ Invalid JSON.");
+      toast.error("❌ Invalid JSON. Please check your syntax.");
+    }
+  };
+
+  const saveEntry = async (inputData, outputData, mode) => {
+    try {
+      const userId = user ? user._id : "guest";
+
+      await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
+        input: JSON.stringify(inputData),
+        output: outputData,
+        mode,
+        userId,
+      });
+    } catch (err) {
+      console.warn("⚠️ Failed to save JSON entry:", err.response?.data?.error || err.message);
     }
   };
 
@@ -97,16 +84,6 @@ const JsonFormatter = () => {
     toast.success("📋 Copied to clipboard!");
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`https://dexlify-devtools.onrender.com/api/jsonformatter/${id}`);
-      setHistory(history.filter((entry) => entry._id !== id));
-      toast.success("🗑️ Deleted from history");
-    } catch {
-      toast.error("❌ Failed to delete entry");
-    }
-  };
-
   return (
     <div className="grid gap-6">
       {/* Input */}
@@ -120,16 +97,16 @@ const JsonFormatter = () => {
             onChange={(e) => setInput(e.target.value)}
             className="bg-gray-800 text-white"
           />
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-3 flex-wrap items-center">
             <Button onClick={handleFormat}>✨ Format</Button>
             <Button onClick={handleMinify}>📦 Minify</Button>
             <Button onClick={handleReset}>🔄 Reset</Button>
+            {!user && (
+              <span className="text-sm text-gray-400">
+                Guest usage: {guestCount}/2
+              </span>
+            )}
           </div>
-          {!user && (
-            <span className="text-sm text-gray-400">
-              Guest usage: {guestCount}/2
-            </span>
-          )}
         </CardContent>
       </Card>
 
@@ -151,34 +128,6 @@ const JsonFormatter = () => {
             />
           </CardContent>
         </Card>
-      )}
-
-      {/* History */}
-      {history.length > 0 && (
-        <div className="grid gap-4">
-          <h3 className="text-xl text-white font-semibold">📜 History</h3>
-          {history.map((entry) => (
-            <Card key={entry._id} className="bg-gray-800 text-white">
-              <CardContent className="p-4 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">
-                    Mode: {entry.mode}
-                  </span>
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleDelete(entry._id)}
-                    className="text-sm bg-red-600 hover:bg-red-700"
-                  >
-                    Delete
-                  </Button>
-                </div>
-                <pre className="bg-black/40 p-3 rounded text-sm overflow-auto whitespace-pre-wrap">
-                  {entry.output}
-                </pre>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       )}
     </div>
   );

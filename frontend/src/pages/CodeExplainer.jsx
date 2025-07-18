@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { checkGuestLimit } from "@/lib/utils";
+import { checkGuestLimit, getGuestUsage } from "@/lib/utils";
 import useAuthStore from "@/store/useAuthStore";
 import axios from "axios";
 
@@ -11,8 +11,16 @@ const CodeExplainer = () => {
   const [code, setCode] = useState("");
   const [explanation, setExplanation] = useState("");
   const [loading, setLoading] = useState(false);
+  const [guestCount, setGuestCount] = useState(0);
 
   const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (!user) {
+      const { count } = getGuestUsage("codeExplainerUsage");
+      setGuestCount(count);
+    }
+  }, [user]);
 
   const handleExplain = async () => {
     if (!code.trim()) {
@@ -20,10 +28,15 @@ const CodeExplainer = () => {
       return;
     }
 
-    // Guest usage restriction
-    if (!user && !checkGuestLimit("codeExplainerUsage")) {
-      toast.error("🚫 Guest limit reached. Please login to continue.");
-      return;
+    // 🔐 Guest usage restriction
+    if (!user) {
+      const allowed = checkGuestLimit("codeExplainerUsage");
+      if (!allowed) {
+        toast.error("🚫 Guest limit reached. Please login to continue.");
+        return;
+      }
+      const { count } = getGuestUsage("codeExplainerUsage");
+      setGuestCount(count);
     }
 
     setLoading(true);
@@ -69,11 +82,16 @@ const CodeExplainer = () => {
             onChange={(e) => setCode(e.target.value)}
             className="bg-gray-800 text-white"
           />
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-3 flex-wrap items-center">
             <Button onClick={handleExplain} disabled={loading}>
               {loading ? "⏳ Explaining..." : "⚡ Explain Code"}
             </Button>
             <Button onClick={handleReset}>🔄 Reset</Button>
+            {!user && (
+              <span className="text-sm text-gray-400">
+                Guest usage: {guestCount}/2
+              </span>
+            )}
           </div>
         </CardContent>
       </Card>
