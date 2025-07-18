@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Trash2Icon } from "lucide-react";
+
 import {
   checkGuestLimit,
   getGuestUsage,
-  resetGuestLimits,
   getOrCreateGuestId,
 } from "@/lib/utils";
 
@@ -110,9 +111,10 @@ const SnippetVault = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 p-4 sm:p-6">
+      {/* Confirm Modal */}
       {showConfirm && selectedSnippet && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-sm text-white space-y-4">
             <h2 className="text-lg font-semibold">
               Delete “{selectedSnippet.title}”?
@@ -122,7 +124,7 @@ const SnippetVault = () => {
             </p>
             <div className="flex justify-end space-x-4">
               <Button
-                className="bg-gray-700 hover:bg-gray-600"
+                className="bg-gray-700 hover:bg-gray-600 rounded-full px-4 py-2"
                 onClick={() => {
                   setShowConfirm(false);
                   setSelectedSnippet(null);
@@ -131,7 +133,7 @@ const SnippetVault = () => {
                 Cancel
               </Button>
               <Button
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 rounded-full px-4 py-2"
                 onClick={confirmDelete}
               >
                 Confirm Delete
@@ -141,6 +143,7 @@ const SnippetVault = () => {
         </div>
       )}
 
+      {/* Snippet Input Form */}
       <Card className="bg-gray-900 text-white">
         <CardContent className="space-y-4 p-6">
           <h2 className="text-xl font-semibold">💾 Save a Snippet</h2>
@@ -157,8 +160,10 @@ const SnippetVault = () => {
             onChange={(e) => setCode(e.target.value)}
             className="bg-gray-800 text-white border border-gray-700"
           />
-          <div className="flex items-center gap-4 flex-wrap">
-            <Button onClick={saveSnippet}>Save Snippet</Button>
+          <div className="flex flex-wrap items-center gap-4">
+            <Button onClick={saveSnippet} className="w-full sm:w-auto">
+              Save Snippet
+            </Button>
             {!token && (
               <span className="text-sm text-gray-400">
                 Guest usage: {guestCount}/2
@@ -168,24 +173,24 @@ const SnippetVault = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Saved Snippets Display */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {snippets.map((snippet) => (
           <Card key={snippet._id} className="bg-gray-800 text-white">
             <CardContent className="p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">{snippet.title}</h3>
+                <h3 className="text-lg font-semibold truncate">{snippet.title}</h3>
                 <Button
-                  variant="destructive"
                   onClick={() => {
                     setSelectedSnippet(snippet);
                     setShowConfirm(true);
                   }}
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-full px-5 py-2 text-sm font-medium transition-all"
                 >
-                  Delete
+                  🗑️ Delete
                 </Button>
               </div>
-              <pre className="bg-black/30 p-3 rounded text-sm overflow-auto whitespace-pre-wrap">
+              <pre className="bg-black/30 p-3 rounded text-sm overflow-auto whitespace-pre-wrap max-h-60">
                 {snippet.code}
               </pre>
             </CardContent>

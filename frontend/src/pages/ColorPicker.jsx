@@ -22,8 +22,8 @@ const ColorPicker = () => {
     let g = parseInt(hex.substr(3, 2), 16) / 255;
     let b = parseInt(hex.substr(5, 2), 16) / 255;
 
-    const max = Math.max(r, g, b),
-      min = Math.min(r, g, b);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
     let h, s, l = (max + min) / 2;
 
     if (max === min) {
@@ -45,11 +45,11 @@ const ColorPicker = () => {
   const copy = (text) => navigator.clipboard.writeText(text);
 
   return (
-    <div className="text-white space-y-6 max-w-3xl mx-auto">
+    <div className="text-white space-y-6 max-w-3xl mx-auto p-4">
       <h1 className="text-3xl font-bold">🎨 Color Picker</h1>
 
       {/* Input Row */}
-      <div className="flex flex-wrap gap-4 items-center">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
         <Input
           type="color"
           value={color}
@@ -69,12 +69,12 @@ const ColorPicker = () => {
       </div>
 
       {/* Color Formats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
         <div className="bg-zinc-800 p-4 rounded-md shadow-sm">
           <p className="mb-2 font-semibold">HEX</p>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-2 break-all">
             <span>{hex}</span>
-            <Button size="sm" onClick={() => copy(hex)}>
+            <Button size="sm" onClick={() => copy(hex)} variant="secondary">
               <CopyIcon className="w-4 h-4" />
             </Button>
           </div>
@@ -82,9 +82,9 @@ const ColorPicker = () => {
 
         <div className="bg-zinc-800 p-4 rounded-md shadow-sm">
           <p className="mb-2 font-semibold">RGB</p>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-2 break-all">
             <span>{rgb}</span>
-            <Button size="sm" onClick={() => copy(rgb)}>
+            <Button size="sm" onClick={() => copy(rgb)} variant="secondary">
               <CopyIcon className="w-4 h-4" />
             </Button>
           </div>
@@ -92,9 +92,9 @@ const ColorPicker = () => {
 
         <div className="bg-zinc-800 p-4 rounded-md shadow-sm">
           <p className="mb-2 font-semibold">HSL</p>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-2 break-all">
             <span>{hsl}</span>
-            <Button size="sm" onClick={() => copy(hsl)}>
+            <Button size="sm" onClick={() => copy(hsl)} variant="secondary">
               <CopyIcon className="w-4 h-4" />
             </Button>
           </div>

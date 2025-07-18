@@ -55,12 +55,13 @@ const APITester = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6">
+    <div className="grid gap-6 max-w-5xl mx-auto p-4 sm:p-6">
+      {/* Request Card */}
       <Card className="bg-gray-900 text-white">
         <CardContent className="p-4 space-y-4">
-          <h2 className="text-xl font-semibold mb-2">API Tester</h2>
+          <h2 className="text-xl font-semibold">🌐 API Tester</h2>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-white">Method</Label>
               <select
@@ -121,20 +122,21 @@ const APITester = () => {
             </div>
           )}
 
-          <Button onClick={sendRequest} >
-            Send Request
-          </Button>
+          <Button onClick={sendRequest}>🚀 Send Request</Button>
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-900 text-white overflow-auto">
-        <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-2">Response</h3>
-          {error ? (
-            <p className="text-red-400 whitespace-pre-wrap">{error}</p>
-          ) : (
-            <pre className="whitespace-pre-wrap">{response}</pre>
-          )}
+      {/* Response Card */}
+      <Card className="bg-gray-900 text-white">
+        <CardContent className="p-4 space-y-2">
+          <h3 className="text-lg font-semibold">📬 Response</h3>
+          <div className="max-h-[400px] overflow-auto bg-gray-800 p-3 rounded text-sm whitespace-pre-wrap">
+            {error ? (
+              <p className="text-red-400">{error}</p>
+            ) : (
+              <pre>{response}</pre>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

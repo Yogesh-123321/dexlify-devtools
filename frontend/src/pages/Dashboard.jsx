@@ -3,8 +3,6 @@ import useAuthStore from "@/store/useAuthStore";
 const Dashboard = () => {
   const user = useAuthStore((state) => state.user);
   const isGuest = !user || user === "guest";
-  const snippetsCount = 5; // Replace with actual count if needed
-  const explanationsCount = 3; // Replace with actual count if needed
 
   const tools = [
     { href: "/json", icon: "🧾", name: "JSON Formatter", desc: "Clean & Minify your JSON with ease." },
@@ -40,15 +38,27 @@ const Dashboard = () => {
         )}
       </section>
 
-      {/* Usage Stats */}
-      <section className="mb-12 flex justify-center gap-12 text-gray-400 text-center">
-        <div>
-          <h2 className="text-3xl font-bold text-yellow-400">{snippetsCount}</h2>
-          <p>Snippets saved</p>
-        </div>
-        <div>
-          <h2 className="text-3xl font-bold text-yellow-400">{explanationsCount}</h2>
-          <p>Codes explained</p>
+      {/* Why Dexlify Highlights */}
+      <section className="mb-12">
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-xl p-6 shadow-inner backdrop-blur">
+          <h3 className="text-center text-2xl font-semibold text-yellow-400 mb-6">Why Choose Dexlify?</h3>
+          <div className="flex flex-col sm:flex-row justify-around items-center gap-6 text-center text-gray-300">
+            <div className="space-y-2 max-w-xs">
+              <div className="text-3xl">⚡</div>
+              <h4 className="font-bold text-white text-lg">Ultra-Fast Tools</h4>
+              <p className="text-sm">Optimized for performance with instant results — no waiting, no clutter.</p>
+            </div>
+            <div className="space-y-2 max-w-xs">
+              <div className="text-3xl">🧠</div>
+              <h4 className="font-bold text-white text-lg">AI-Powered Intelligence</h4>
+              <p className="text-sm">Understand code effortlessly with smart, developer-friendly explanations.</p>
+            </div>
+            <div className="space-y-2 max-w-xs">
+              <div className="text-3xl">🧰</div>
+              <h4 className="font-bold text-white text-lg">One Suite. Every Tool.</h4>
+              <p className="text-sm">JSON, Markdown, Regex, API testing, Snippets, Color tools — all in one dashboard.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -59,11 +69,11 @@ const Dashboard = () => {
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {tools.map(({ href, icon, name, desc }) => (
-         <a
-  key={name}
-  href={href}
-  className="bg-primary text-primary-foreground p-6 rounded-lg shadow hover:bg-primary/90 hover:shadow-xl transition duration-200 flex flex-col"
->
+            <a
+              key={name}
+              href={href}
+              className="bg-primary text-primary-foreground p-6 rounded-lg shadow hover:bg-primary/90 hover:shadow-xl transition duration-200 flex flex-col"
+            >
               <span className="text-4xl mb-4">{icon}</span>
               <h4 className="text-xl font-semibold mb-2">{name}</h4>
               <p className="text-gray-800 flex-grow">{desc}</p>
@@ -79,7 +89,7 @@ const Dashboard = () => {
         <p>
           Join our{" "}
           <a
-            href="https://discord.gg/yourdiscord"
+            href="https://discord.gg/WysPNEWz"
             target="_blank"
             rel="noreferrer"
             className="underline hover:text-yellow-400"
@@ -88,7 +98,7 @@ const Dashboard = () => {
           </a>{" "}
           or check our{" "}
           <a
-            href="https://github.com/yourrepo"
+            href="https://github.com/Yogesh-123321/dexlify-devtools"
             target="_blank"
             rel="noreferrer"
             className="underline hover:text-yellow-400"
@@ -96,7 +106,7 @@ const Dashboard = () => {
             GitHub
           </a>.
         </p>
-        <p className="mt-2 italic text-gray-600">v1.0 coming soon: snippet history, cloud sync & more!</p>
+        <p className="mt-2 italic text-gray-600">v1.0 coming soon: formatter history, cloud sync & more!</p>
       </footer>
     </div>
   );

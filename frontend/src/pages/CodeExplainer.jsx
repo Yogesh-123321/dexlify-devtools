@@ -41,7 +41,6 @@ const CodeExplainer = () => {
       return;
     }
 
-    // Guest usage restriction
     if (!user && !checkGuestLimit("codeExplainerUsage")) {
       toast.error("🚫 Guest limit reached. Please login to continue.");
       return;
@@ -84,7 +83,7 @@ const CodeExplainer = () => {
   };
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 max-w-5xl mx-auto p-4 sm:p-6">
       {/* Input Section */}
       <Card className="bg-gray-900 text-white">
         <CardContent className="p-4 space-y-4">
@@ -96,7 +95,7 @@ const CodeExplainer = () => {
             onChange={(e) => setCode(e.target.value)}
             className="bg-gray-800 text-white"
           />
-          <div className="flex gap-3 flex-wrap items-center">
+          <div className="flex flex-wrap gap-3 items-center">
             <Button onClick={handleExplain} disabled={loading}>
               {loading ? "⏳ Explaining..." : "⚡ Explain Code"}
             </Button>
@@ -114,7 +113,7 @@ const CodeExplainer = () => {
       {explanation && (
         <Card className="bg-gray-800 text-white">
           <CardContent className="p-4 space-y-3">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <h3 className="text-lg font-semibold">📄 Explanation</h3>
               <Button onClick={handleCopy} className="text-sm">
                 📋 Copy

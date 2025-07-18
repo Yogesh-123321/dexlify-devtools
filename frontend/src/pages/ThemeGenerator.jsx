@@ -101,7 +101,7 @@ const ThemeGenerator = () => {
       </p>
 
       {/* Theme Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {themes.map((theme) => (
           <div
             key={theme.name}
@@ -158,7 +158,7 @@ const ThemeGenerator = () => {
             Copy Theme as JSON
           </Button>
 
-          {/* 🔥 Browser-style Live Preview */}
+          {/* Browser-style Live Preview */}
           <div
             className="rounded-md overflow-hidden shadow-lg border border-zinc-700 mt-8"
             style={{ backgroundColor: selected.colors.background }}
@@ -178,7 +178,7 @@ const ThemeGenerator = () => {
               <h3 className="text-xl font-semibold">Welcome to Dexlify!</h3>
               <p>This is how your website might look with this theme.</p>
 
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <button
                   className="px-4 py-2 rounded-md font-medium shadow"
                   style={{
@@ -203,7 +203,6 @@ const ThemeGenerator = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

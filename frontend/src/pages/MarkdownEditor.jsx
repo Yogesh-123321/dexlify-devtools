@@ -55,17 +55,22 @@ const MarkdownEditor = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
       
-      {/* Markdown Input Side (Left) */}
-      <Card className="h-full bg-gray-900 text-white">
-        <CardContent className="p-4">
-          <h2 className="text-xl font-semibold mb-2">Markdown Input</h2>
+      {/* Markdown Input Side */}
+      <Card className="bg-gray-900 text-white">
+        <CardContent className="p-4 space-y-4">
+          <h2 className="text-xl font-semibold">Markdown Input</h2>
 
           {/* Toolbar */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2">
             {toolbarButtons.map((btn, index) => (
-              <Button key={index} variant="secondary" className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-2 py-1" onClick={btn.onClick}>
+              <Button
+                key={index}
+                variant="secondary"
+                className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-2 py-1"
+                onClick={btn.onClick}
+              >
                 {btn.label}
               </Button>
             ))}
@@ -73,34 +78,33 @@ const MarkdownEditor = () => {
 
           <Textarea
             ref={textareaRef}
-            rows={25}
+            rows={20}
             value={markdown}
             onChange={(e) => setMarkdown(e.target.value)}
             placeholder="Write some markdown here..."
             className="min-h-[200px] bg-gray-900 text-white placeholder:text-gray-400"
           />
 
-          {/* Export .md only */}
-          <div className="mt-4">
-            <Button onClick={downloadMarkdown}>
-              Export as .md
-            </Button>
-          </div>
+          <Button onClick={downloadMarkdown} className="w-full sm:w-auto">
+            Export as .md
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Markdown Preview Side (Right) */}
-      <Card className="h-full bg-gray-900 text-white overflow-auto">
-        <CardContent className="p-4 prose prose-invert max-w-none">
-          <h2 className="text-xl font-semibold mb-2">Preview</h2>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+      {/* Markdown Preview Side */}
+      <Card className="bg-gray-900 text-white overflow-auto">
+        <CardContent className="p-4 space-y-4">
+          <h2 className="text-xl font-semibold">Preview</h2>
 
-          {/* Export PDF here */}
-          <div className="mt-4">
-            <Button onClick={downloadPDF}>
-              Export as PDF
-            </Button>
+          <div className="prose prose-invert max-w-none overflow-x-auto text-sm">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {markdown}
+            </ReactMarkdown>
           </div>
+
+          <Button onClick={downloadPDF} className="w-full sm:w-auto">
+            Export as PDF
+          </Button>
         </CardContent>
       </Card>
 

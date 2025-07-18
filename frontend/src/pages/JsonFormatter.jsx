@@ -68,10 +68,10 @@ const JsonFormatter = () => {
   };
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Input */}
       <Card className="bg-gray-900 text-white">
-        <CardContent className="p-4 space-y-4">
+        <CardContent className="p-4 sm:p-6 space-y-4">
           <h2 className="text-xl font-semibold">🔧 JSON Formatter</h2>
           <Textarea
             placeholder="Paste your JSON here..."
@@ -80,10 +80,16 @@ const JsonFormatter = () => {
             onChange={(e) => setInput(e.target.value)}
             className="bg-gray-800 text-white"
           />
-          <div className="flex gap-3 flex-wrap">
-            <Button onClick={handleFormat}>✨ Format</Button>
-            <Button onClick={handleMinify}>📦 Minify</Button>
-            <Button onClick={handleReset}>🔄 Reset</Button>
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={handleFormat} className="w-full sm:w-auto">
+              ✨ Format
+            </Button>
+            <Button onClick={handleMinify} className="w-full sm:w-auto">
+              📦 Minify
+            </Button>
+            <Button onClick={handleReset} className="w-full sm:w-auto">
+              🔄 Reset
+            </Button>
           </div>
           {!token && (
             <p className="text-sm text-gray-400">
@@ -96,10 +102,10 @@ const JsonFormatter = () => {
       {/* Output */}
       {output && (
         <Card className="bg-gray-800 text-white">
-          <CardContent className="p-4 space-y-3">
-            <div className="flex justify-between items-center">
+          <CardContent className="p-4 sm:p-6 space-y-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <h3 className="text-lg font-semibold">🧾 Output</h3>
-              <Button onClick={handleCopy} className="text-sm">
+              <Button onClick={handleCopy} className="text-sm w-full sm:w-auto">
                 📋 Copy
               </Button>
             </div>
@@ -107,7 +113,7 @@ const JsonFormatter = () => {
               value={output}
               readOnly
               rows={10}
-              className="bg-gray-900 text-green-400 font-mono"
+              className="bg-gray-900 text-green-400 font-mono resize-none"
             />
           </CardContent>
         </Card>

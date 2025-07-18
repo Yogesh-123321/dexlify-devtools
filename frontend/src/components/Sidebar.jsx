@@ -5,8 +5,6 @@ import {
   FlaskConicalIcon,
   NotebookTextIcon,
   CodeIcon,
-  MenuIcon,
-  XIcon,
   PaletteIcon,
   ChevronLeft,
   ChevronRight,
@@ -27,9 +25,8 @@ const navLinks = [
   { to: "/theme", label: "Theme Generator", icon: <PaletteIcon className="w-5 h-5" /> },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ closeSidebar }) {
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
   const renderLinks = () => (
@@ -40,7 +37,7 @@ export default function Sidebar() {
           <Link
             key={to}
             to={to}
-            onClick={() => setMobileOpen(false)}
+            onClick={closeSidebar} // closes sidebar on mobile
             className={cn(
               "flex items-center gap-3 text-sm font-medium px-4 py-2 rounded-md transition-all",
               isActive
@@ -72,46 +69,23 @@ export default function Sidebar() {
   );
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside
-        className={cn(
-          "hidden md:flex h-screen bg-black border-r border-primary shadow-lg flex-col transition-all duration-300",
-          collapsed ? "w-20" : "w-64"
-        )}
-      >
-        {logoBlock}
-        <div className="flex-1 overflow-y-auto px-2 py-2">{renderLinks()}</div>
-      </aside>
-
-      {/* Mobile Top Bar */}
-      <div className="md:hidden flex justify-between items-center bg-black px-4 py-3 border-b border-primary shadow">
-        <img
-          src="/assets/dexlify-logo-modern.png"
-          alt="Dexlify Logo"
-          className="w-28 object-contain drop-shadow-md"
-        />
-        <button onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <XIcon className="w-6 h-6 text-white" /> : <MenuIcon className="w-6 h-6 text-white" />}
-        </button>
-      </div>
-
-      {/* Mobile Sidebar Panel */}
-      {mobileOpen && (
-        <div className="md:hidden fixed top-0 left-0 z-50 h-full w-64 bg-black border-r border-primary p-5 space-y-6 shadow-xl">
-          <div className="flex justify-between items-center">
-            <img
-              src="/assets/dexlify-logo-modern.png"
-              alt="Dexlify Logo"
-              className="w-28 object-contain drop-shadow-md"
-            />
-            <button onClick={() => setMobileOpen(false)}>
-              <XIcon className="w-5 h-5 text-white" />
-            </button>
-          </div>
-          {renderLinks()}
-        </div>
+    <aside
+      className={cn(
+        "h-full bg-black border-r border-primary shadow-lg flex-col transition-all duration-300",
+        collapsed ? "w-20" : "w-64"
       )}
-    </>
+    >
+      {/* Top bar (logo & collapse) */}
+      <div className="flex justify-between items-center">
+        {logoBlock}
+        {/* Optional mobile close button */}
+        {closeSidebar && (
+          <button onClick={closeSidebar} className="md:hidden text-white px-4">
+            ✕
+          </button>
+        )}
+      </div>
+      <div className="flex-1 overflow-y-auto px-2 py-2">{renderLinks()}</div>
+    </aside>
   );
 }
