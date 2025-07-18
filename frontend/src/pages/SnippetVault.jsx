@@ -38,7 +38,7 @@ const SnippetVault = () => {
         ? { Authorization: `Bearer ${token}` }
         : { "x-guest-id": getOrCreateGuestId() };
 
-      const res = await axios.get("http://dexlify-devtools.onrender.com/api/snippets", {
+      const res = await axios.get("https://dexlify-devtools.onrender.com/api/snippets", {
         headers,
         withCredentials: true,
       });
@@ -72,7 +72,7 @@ const SnippetVault = () => {
 
     try {
       const res = await axios.post(
-        "http://dexlify-devtools.onrender.com/api/snippets",
+        "https://dexlify-devtools.onrender.com/api/snippets",
         { title, code },
         {
           headers,
@@ -94,7 +94,7 @@ const SnippetVault = () => {
         ? { Authorization: `Bearer ${token}` }
         : { "x-guest-id": getOrCreateGuestId() };
 
-      await axios.delete(`http://dexlify-devtools.onrender.com/api/snippets/${selectedSnippet._id}`, {
+      await axios.delete(`https://dexlify-devtools.onrender.com/api/snippets/${selectedSnippet._id}`, {
         headers,
         withCredentials: true,
       });
