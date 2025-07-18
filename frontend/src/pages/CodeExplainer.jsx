@@ -5,31 +5,34 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { checkGuestLimit, getGuestUsage } from "@/lib/utils";
 import useAuthStore from "@/store/useAuthStore";
+import useExplainerStore from "@/store/useExplainerStore"; // ✅ Import
 import axios from "axios";
 
 const CodeExplainer = () => {
   const [code, setCode] = useState("");
   const [explanation, setExplanation] = useState("");
-  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
 
   const user = useAuthStore((state) => state.user);
 
-  useEffect(() => {
-    fetchHistory();
+  // ✅ Get history and setter from store
+  const history = useExplainerStore((state) => state.history);
+  const setHistory = useExplainerStore((state) => state.setHistory);
 
+  useEffect(() => {
     if (!user) {
       const { count } = getGuestUsage("codeExplainerUsage");
       setGuestCount(count);
+    } else {
+      fetchHistory();
     }
   }, [user]);
 
   const fetchHistory = async () => {
-    if (!user) return;
     try {
       const res = await axios.get("https://dexlify-devtools.onrender.com/api/explainer");
-      setHistory(res.data);
+      setHistory(res.data); // ✅ Store history in global store
     } catch (err) {
       console.error("Failed to fetch explanation history:", err.message);
     }
@@ -61,7 +64,7 @@ const CodeExplainer = () => {
 
       setExplanation(res.data.explanation || "No explanation returned.");
       toast.success("✅ Explanation generated!");
-      fetchHistory();
+      fetchHistory(); // ✅ Refetch from backend
     } catch (err) {
       console.error(err);
       toast.error("❌ Failed to explain the code.");
