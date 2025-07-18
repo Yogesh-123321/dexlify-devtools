@@ -1,7 +1,9 @@
+// explainerRoute.js
 import express from "express";
 import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import mongoose from "mongoose";
 import Explanation from "../models/Explanation.js";
 import { detectUser } from "../middleware/verifyToken.js";
 
@@ -13,17 +15,10 @@ router.post("/", detectUser, async (req, res) => {
   const { code } = req.body;
   const userId = req.userId;
 
-  console.log("📥 Received code:", code, "| User ID:", userId);
-
   if (!code) return res.status(400).json({ error: "Code is required" });
 
   const python = spawn("python3", ["explain.py"], {
     cwd: path.join(__dirname, ".."),
-  });
-
-  python.on("error", (err) => {
-    console.error("❌ Failed to start Python process:", err.message);
-    return res.status(500).json({ error: "Failed to start Python process" });
   });
 
   let result = "", error = "";
@@ -32,25 +27,21 @@ router.post("/", detectUser, async (req, res) => {
   python.stderr.on("data", (data) => (error += data.toString()));
 
   python.on("close", async () => {
-    if (error) {
-      console.error("❌ Python error:", error);
-      return res.status(500).json({ error: "Python script failed" });
-    }
+    if (error) return res.status(500).json({ error: "Python error" });
 
     try {
       const json = JSON.parse(result);
       if (json.error) return res.status(400).json(json);
 
       const entry = new Explanation({
-        user: userId === "guest" ? null : userId,
         code,
         explanation: json.explanation,
+        user: userId ? new mongoose.Types.ObjectId(userId) : null,
       });
 
       await entry.save();
       res.status(201).json(entry);
     } catch (e) {
-      console.error("❌ JSON Parse error:", e.message);
       res.status(500).json({ error: "Failed to parse Python output" });
     }
   });
@@ -59,18 +50,21 @@ router.post("/", detectUser, async (req, res) => {
   python.stdin.end();
 });
 
-// GET /api/explainer
+// ✅ GET /api/explainer – Secure fetch for logged-in users only
 router.get("/", detectUser, async (req, res) => {
   const userId = req.userId;
 
-  if (userId === "guest") {
+  if (!userId) {
     return res.status(403).json({ error: "Login required to fetch history." });
   }
 
   try {
-    const entries = await Explanation.find({ user: userId }).sort({ createdAt: -1 });
+    const entries = await Explanation.find({
+      user: new mongoose.Types.ObjectId(userId), // ✅ CAST required
+    }).sort({ createdAt: -1 });
+
     res.json(entries);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: "Failed to fetch explanation history." });
   }
 });
