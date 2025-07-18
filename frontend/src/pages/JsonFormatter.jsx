@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { checkGuestLimit, getGuestUsage } from "@/lib/utils";
+import { checkGuestLimit, getOrCreateGuestId, getGuestUsage } from "@/lib/utils";
 import useAuthStore from "@/store/useAuthStore";
 import axios from "axios";
 
@@ -12,37 +12,35 @@ const JsonFormatter = () => {
   const [output, setOutput] = useState("");
   const [history, setHistory] = useState([]);
   const [guestCount, setGuestCount] = useState(0);
-
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
 
   useEffect(() => {
     fetchHistory();
-
     if (!user) {
       const { count } = getGuestUsage("jsonFormatterUsage");
       setGuestCount(count);
     }
-  }, [user]);
+  }, []);
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get("https://dexlify-devtools.onrender.com/api/jsonformatter", {
-        params: {
-          user: user?._id || "guest",
-        },
-      });
-      setHistory(res.data);
+      const userId = user ? user._id : getOrCreateGuestId();
+      const res = await axios.get(`https://dexlify-devtools.onrender.com/api/jsonformatter?user=${userId}`);
+      setHistory(res.data || []);
     } catch (err) {
-      console.error("Failed to fetch history:", err.message);
+      console.error("❌ Error fetching history:", err.message);
     }
   };
 
   const handleFormat = async () => {
+    if (!input.trim()) {
+      toast.error("❌ Input is empty!");
+      return;
+    }
+
     if (!user) {
       const allowed = checkGuestLimit("jsonFormatterUsage");
-      if (!allowed) {
-        return toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
-      }
+      if (!allowed) return toast.error("🚫 Guest limit reached. Please sign up to continue.");
       const { count } = getGuestUsage("jsonFormatterUsage");
       setGuestCount(count);
     }
@@ -51,37 +49,50 @@ const JsonFormatter = () => {
       const parsed = JSON.parse(input);
       const pretty = JSON.stringify(parsed, null, 2);
       setOutput(pretty);
-      toast.success("✨ JSON formatted!");
-      await saveEntry(pretty, "format");
+
+      await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
+        input,
+        output: pretty,
+        mode: "format",
+        userId: user ? user._id : "guest",
+      });
+
+      toast.success("✨ JSON formatted and saved!");
       fetchHistory();
-    } catch {
+    } catch (err) {
       toast.error("❌ Invalid JSON.");
     }
   };
 
   const handleMinify = async () => {
+    if (!input.trim()) {
+      toast.error("❌ Input is empty!");
+      return;
+    }
+
+    if (!user) {
+      const allowed = checkGuestLimit("jsonFormatterUsage");
+      if (!allowed) return toast.error("🚫 Guest limit reached. Please sign up to continue.");
+      const { count } = getGuestUsage("jsonFormatterUsage");
+      setGuestCount(count);
+    }
+
     try {
       const parsed = JSON.parse(input);
       const minified = JSON.stringify(parsed);
       setOutput(minified);
-      toast.success("📦 JSON minified!");
-      await saveEntry(minified, "minify");
-      fetchHistory();
-    } catch {
-      toast.error("❌ Invalid JSON. Please check your syntax.");
-    }
-  };
 
-  const saveEntry = async (result, mode) => {
-    try {
       await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
         input,
-        output: result,
-        mode,
-        userId: user?._id || "guest",
+        output: minified,
+        mode: "minify",
+        userId: user ? user._id : "guest",
       });
+
+      toast.success("📦 JSON minified and saved!");
+      fetchHistory();
     } catch (err) {
-      console.warn("⚠️ Failed to save entry:", err.response?.data?.error || err.message);
+      toast.error("❌ Invalid JSON.");
     }
   };
 
@@ -129,9 +140,7 @@ const JsonFormatter = () => {
           <CardContent className="p-4 space-y-3">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">🧾 Output</h3>
-              <Button onClick={handleCopy} className="text-sm">
-                📋 Copy
-              </Button>
+              <Button onClick={handleCopy} className="text-sm">📋 Copy</Button>
             </div>
             <Textarea
               value={output}
@@ -147,18 +156,12 @@ const JsonFormatter = () => {
       {history.length > 0 && (
         <Card className="bg-gray-900 text-white">
           <CardContent className="p-4 space-y-4">
-            <h2 className="text-lg font-semibold">📜 Your JSON History</h2>
-            {history.map((item, index) => (
-              <div
-                key={index}
-                className="border border-gray-700 rounded p-3 space-y-2 bg-gray-800"
-              >
-                <div className="text-sm text-gray-400">
-                  Mode: {item.mode?.toUpperCase() || "UNKNOWN"}
-                </div>
-                <pre className="whitespace-pre-wrap text-xs bg-black/30 p-2 rounded text-green-300">
-                  {item.output}
-                </pre>
+            <h3 className="text-lg font-semibold">📚 JSON History</h3>
+            {history.map((entry, idx) => (
+              <div key={idx} className="border border-gray-700 p-3 rounded space-y-1 bg-gray-800">
+                <p className="text-xs text-gray-400">🕒 {new Date(entry.createdAt).toLocaleString()}</p>
+                <p className="text-sm">📥 Input: <pre className="whitespace-pre-wrap text-gray-300">{entry.input}</pre></p>
+                <p className="text-sm">📤 Output: <pre className="whitespace-pre-wrap text-green-400">{entry.output}</pre></p>
               </div>
             ))}
           </CardContent>
