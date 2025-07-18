@@ -19,12 +19,13 @@ const JsonFormatter = () => {
 
   const { user, token } = useAuthStore();
 
+  // 🧠 Fetch history only after user/token is ready
   useEffect(() => {
-    if (user || token !== null) {
+    if (user || token) {
       fetchHistory();
     }
 
-    if (!user && !token) {
+    if (!token) {
       const { count } = getGuestUsage("jsonFormatterUsage");
       setGuestCount(count);
     }
@@ -32,9 +33,7 @@ const JsonFormatter = () => {
 
   const fetchHistory = async () => {
     try {
-      const userId = user?._id || getOrCreateGuestId();
-      if (!userId) return;
-
+      const userId = user?.userId || getOrCreateGuestId();
       const res = await axios.get(
         `https://dexlify-devtools.onrender.com/api/jsonformatter?user=${userId}`
       );
@@ -46,51 +45,52 @@ const JsonFormatter = () => {
 
   const saveToHistory = async (formatted, mode) => {
     try {
-      const userId = user?._id || "guest";
-
+      const userId = user?.userId || "guest";
       await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
         input,
         output: formatted,
         mode,
         userId,
       });
-
-      fetchHistory(); // refresh after save
+      fetchHistory(); // refresh history
     } catch (err) {
       console.error("❌ History save error:", err.message);
+      toast.error("❌ Failed to save history.");
     }
   };
 
   const handleFormat = () => {
+    if (!input.trim()) return toast.error("❌ Input is empty!");
+
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
-      toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
-      return;
+      return toast.error("🚫 Guest limit reached. Please sign up to continue.");
     }
 
     try {
       const parsed = JSON.parse(input);
       const pretty = JSON.stringify(parsed, null, 2);
       setOutput(pretty);
-      saveToHistory(pretty, "beautify");
       toast.success("✨ JSON formatted!");
-    } catch {
+      saveToHistory(pretty, "format");
+    } catch (err) {
       toast.error("❌ Invalid JSON. Please check your syntax.");
     }
   };
 
   const handleMinify = () => {
+    if (!input.trim()) return toast.error("❌ Input is empty!");
+
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
-      toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
-      return;
+      return toast.error("🚫 Guest limit reached. Please sign up to continue.");
     }
 
     try {
       const parsed = JSON.parse(input);
       const minified = JSON.stringify(parsed);
       setOutput(minified);
-      saveToHistory(minified, "minify");
       toast.success("📦 JSON minified!");
-    } catch {
+      saveToHistory(minified, "minify");
+    } catch (err) {
       toast.error("❌ Invalid JSON. Please check your syntax.");
     }
   };
@@ -124,7 +124,7 @@ const JsonFormatter = () => {
             <Button onClick={handleFormat}>✨ Format</Button>
             <Button onClick={handleMinify}>📦 Minify</Button>
             <Button onClick={handleReset}>🔄 Reset</Button>
-            {!user && (
+            {!token && (
               <span className="text-sm text-gray-400">
                 Guest usage: {guestCount}/2
               </span>
@@ -139,7 +139,9 @@ const JsonFormatter = () => {
           <CardContent className="p-4 space-y-3">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">🧾 Output</h3>
-              <Button onClick={handleCopy} className="text-sm">📋 Copy</Button>
+              <Button onClick={handleCopy} className="text-sm">
+                📋 Copy
+              </Button>
             </div>
             <Textarea
               value={output}
@@ -162,7 +164,8 @@ const JsonFormatter = () => {
                 className="bg-gray-800 p-3 rounded text-sm overflow-auto whitespace-pre-wrap border border-gray-700"
               >
                 <p className="text-xs text-gray-400 mb-1">
-                  Mode: {entry.mode} | {new Date(entry.createdAt).toLocaleString()}
+                  Mode: {entry.mode} | Date:{" "}
+                  {new Date(entry.createdAt).toLocaleString()}
                 </p>
                 <pre>{entry.output}</pre>
               </div>
