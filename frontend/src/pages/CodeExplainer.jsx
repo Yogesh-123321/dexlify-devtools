@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -10,17 +10,30 @@ import axios from "axios";
 const CodeExplainer = () => {
   const [code, setCode] = useState("");
   const [explanation, setExplanation] = useState("");
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
 
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
+    fetchHistory();
+
     if (!user) {
       const { count } = getGuestUsage("codeExplainerUsage");
       setGuestCount(count);
     }
   }, [user]);
+
+  const fetchHistory = async () => {
+    if (!user) return;
+    try {
+      const res = await axios.get("https://dexlify-devtools.onrender.com/api/explainer");
+      setHistory(res.data);
+    } catch (err) {
+      console.error("Failed to fetch explanation history:", err.message);
+    }
+  };
 
   const handleExplain = async () => {
     if (!code.trim()) {
@@ -28,13 +41,13 @@ const CodeExplainer = () => {
       return;
     }
 
-    // 🔐 Guest usage restriction
+    // Guest usage restriction
+    if (!user && !checkGuestLimit("codeExplainerUsage")) {
+      toast.error("🚫 Guest limit reached. Please login to continue.");
+      return;
+    }
+
     if (!user) {
-      const allowed = checkGuestLimit("codeExplainerUsage");
-      if (!allowed) {
-        toast.error("🚫 Guest limit reached. Please login to continue.");
-        return;
-      }
       const { count } = getGuestUsage("codeExplainerUsage");
       setGuestCount(count);
     }
@@ -49,6 +62,7 @@ const CodeExplainer = () => {
 
       setExplanation(res.data.explanation || "No explanation returned.");
       toast.success("✅ Explanation generated!");
+      fetchHistory();
     } catch (err) {
       console.error(err);
       toast.error("❌ Failed to explain the code.");
@@ -112,6 +126,28 @@ const CodeExplainer = () => {
               rows={10}
               className="bg-gray-900 text-green-400 font-mono"
             />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* History Section */}
+      {history.length > 0 && (
+        <Card className="bg-gray-900 text-white">
+          <CardContent className="p-4 space-y-4">
+            <h2 className="text-lg font-semibold">📜 Your Explanation History</h2>
+            {history.map((item, idx) => (
+              <div
+                key={idx}
+                className="border border-gray-700 rounded p-3 space-y-2 bg-gray-800"
+              >
+                <pre className="text-sm font-mono text-gray-300 whitespace-pre-wrap bg-black/30 p-2 rounded">
+                  {item.code}
+                </pre>
+                <div className="text-green-400 font-mono text-sm bg-black/20 p-2 rounded">
+                  {item.explanation}
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}

@@ -10,19 +10,34 @@ import axios from "axios";
 const JsonFormatter = () => {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
+  const [history, setHistory] = useState([]);
   const [guestCount, setGuestCount] = useState(0);
 
-  const { user, token } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
+    fetchHistory();
+
     if (!user) {
       const { count } = getGuestUsage("jsonFormatterUsage");
       setGuestCount(count);
     }
   }, [user]);
 
+  const fetchHistory = async () => {
+    try {
+      const res = await axios.get("https://dexlify-devtools.onrender.com/api/jsonformatter", {
+        params: {
+          user: user?._id || "guest",
+        },
+      });
+      setHistory(res.data);
+    } catch (err) {
+      console.error("Failed to fetch history:", err.message);
+    }
+  };
+
   const handleFormat = async () => {
-    // 🔐 Guest check
     if (!user) {
       const allowed = checkGuestLimit("jsonFormatterUsage");
       if (!allowed) {
@@ -37,9 +52,9 @@ const JsonFormatter = () => {
       const pretty = JSON.stringify(parsed, null, 2);
       setOutput(pretty);
       toast.success("✨ JSON formatted!");
-
-      await saveEntry(parsed, pretty, "format");
-    } catch (err) {
+      await saveEntry(pretty, "format");
+      fetchHistory();
+    } catch {
       toast.error("❌ Invalid JSON.");
     }
   };
@@ -50,25 +65,23 @@ const JsonFormatter = () => {
       const minified = JSON.stringify(parsed);
       setOutput(minified);
       toast.success("📦 JSON minified!");
-
-      await saveEntry(parsed, minified, "minify");
-    } catch (err) {
+      await saveEntry(minified, "minify");
+      fetchHistory();
+    } catch {
       toast.error("❌ Invalid JSON. Please check your syntax.");
     }
   };
 
-  const saveEntry = async (inputData, outputData, mode) => {
+  const saveEntry = async (result, mode) => {
     try {
-      const userId = user ? user._id : "guest";
-
       await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
-        input: JSON.stringify(inputData),
-        output: outputData,
+        input,
+        output: result,
         mode,
-        userId,
+        userId: user?._id || "guest",
       });
     } catch (err) {
-      console.warn("⚠️ Failed to save JSON entry:", err.response?.data?.error || err.message);
+      console.warn("⚠️ Failed to save entry:", err.response?.data?.error || err.message);
     }
   };
 
@@ -126,6 +139,28 @@ const JsonFormatter = () => {
               rows={10}
               className="bg-gray-900 text-green-400 font-mono"
             />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* History */}
+      {history.length > 0 && (
+        <Card className="bg-gray-900 text-white">
+          <CardContent className="p-4 space-y-4">
+            <h2 className="text-lg font-semibold">📜 Your JSON History</h2>
+            {history.map((item, index) => (
+              <div
+                key={index}
+                className="border border-gray-700 rounded p-3 space-y-2 bg-gray-800"
+              >
+                <div className="text-sm text-gray-400">
+                  Mode: {item.mode?.toUpperCase() || "UNKNOWN"}
+                </div>
+                <pre className="whitespace-pre-wrap text-xs bg-black/30 p-2 rounded text-green-300">
+                  {item.output}
+                </pre>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
