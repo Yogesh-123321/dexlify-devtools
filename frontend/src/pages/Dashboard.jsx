@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import useAuthStore from "@/store/useAuthStore";
 
 const Dashboard = () => {
@@ -15,10 +16,24 @@ const Dashboard = () => {
     { href: "/theme", icon: "🌈", name: "Theme Generator", desc: "Create beautiful themes effortlessly." },
   ];
 
+  const fadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.1 },
+    }),
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 text-white">
-      {/* Hero */}
-      <section className="mb-12 text-center">
+      {/* Hero Section */}
+      <motion.section
+        className="mb-12 text-center"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <h1 className="text-5xl font-extrabold mb-4">
           👋 Welcome to <span className="text-yellow-400">Dexlify</span>
         </h1>
@@ -28,62 +43,92 @@ const Dashboard = () => {
         </p>
 
         {isGuest && (
-          <div className="mt-6 bg-yellow-900 text-yellow-100 p-3 rounded max-w-md mx-auto">
-            👤 You’re in <strong>Guest Mode</strong>. Limited to 2 snippets and explanations.{" "}
+          <motion.div
+            className="mt-6 bg-yellow-900 text-yellow-100 p-3 rounded max-w-md mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            👤 You’re in <strong>Guest Mode</strong>.{" "}
             <a href="/signup" className="underline font-semibold hover:text-yellow-300">
               Sign up
             </a>{" "}
-            to unlock full access.
-          </div>
+            to unlock full features.
+          </motion.div>
         )}
-      </section>
+      </motion.section>
 
-      {/* Why Dexlify Highlights */}
-      <section className="mb-12">
-        <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-xl p-6 shadow-inner backdrop-blur">
-          <h3 className="text-center text-2xl font-semibold text-yellow-400 mb-6">Why Choose Dexlify?</h3>
-          <div className="flex flex-col sm:flex-row justify-around items-center gap-6 text-center text-gray-300">
-            <div className="space-y-2 max-w-xs">
-              <div className="text-3xl">⚡</div>
-              <h4 className="font-bold text-white text-lg">Ultra-Fast Tools</h4>
-              <p className="text-sm">Optimized for performance with instant results — no waiting, no clutter.</p>
-            </div>
-            <div className="space-y-2 max-w-xs">
-              <div className="text-3xl">🧠</div>
-              <h4 className="font-bold text-white text-lg">AI-Powered Intelligence</h4>
-              <p className="text-sm">Understand code effortlessly with smart, developer-friendly explanations.</p>
-            </div>
-            <div className="space-y-2 max-w-xs">
-              <div className="text-3xl">🧰</div>
-              <h4 className="font-bold text-white text-lg">One Suite. Every Tool.</h4>
-              <p className="text-sm">JSON, Markdown, Regex, API testing, Snippets, Color tools — all in one dashboard.</p>
-            </div>
+      {/* Why Choose Dexlify Section */}
+      <motion.section
+        className="mb-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
+        <motion.div
+          className="bg-zinc-800 p-6 sm:p-8 rounded-lg shadow-md"
+          variants={fadeUp}
+          custom={0}
+        >
+          <h3 className="text-2xl font-semibold mb-6 text-yellow-400 text-center">
+            Why Choose Dexlify?
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {[
+              {
+                title: "⚡ Fast Tools",
+                desc: "Lightning-fast utilities optimized for productivity.",
+              },
+              {
+                title: "🧠 Smart AI",
+                desc: "Use AI to explain and understand code instantly.",
+              },
+              {
+                title: "📦 All-in-One",
+                desc: "Access all dev tools in one seamless dashboard.",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                custom={i + 1}
+                className="bg-zinc-900 p-4 rounded-md hover:bg-zinc-700 hover:scale-[1.02] hover:shadow-lg transition-all duration-300"
+              >
+                <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
+                <p className="text-sm text-gray-300">{item.desc}</p>
+              </motion.div>
+            ))}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
-      {/* Tools Grid */}
+      {/* Tool Grid Section */}
       <section>
         <h3 className="text-2xl font-semibold mb-6 text-yellow-400 text-center">
           Explore Tools
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {tools.map(({ href, icon, name, desc }) => (
-            <a
+          {tools.map(({ href, icon, name, desc }, i) => (
+            <motion.a
               key={name}
               href={href}
-              className="bg-primary text-primary-foreground p-6 rounded-lg shadow hover:bg-primary/90 hover:shadow-xl transition duration-200 flex flex-col"
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              custom={i}
+              className="bg-primary text-primary-foreground p-6 rounded-lg shadow hover:shadow-yellow-400/30 hover:bg-primary/90 hover:scale-105 transition-all duration-300 flex flex-col"
             >
               <span className="text-4xl mb-4">{icon}</span>
               <h4 className="text-xl font-semibold mb-2">{name}</h4>
               <p className="text-gray-800 flex-grow">{desc}</p>
               <span className="mt-4 font-semibold">Try it →</span>
-            </a>
+            </motion.a>
           ))}
         </div>
       </section>
 
-      {/* Footer / Community */}
+      {/* Footer Section */}
       <footer className="mt-16 border-t border-gray-700 pt-8 text-gray-500 text-center text-sm">
         <p>✨ Made with 💛 for developers.</p>
         <p>
@@ -94,7 +139,7 @@ const Dashboard = () => {
             rel="noreferrer"
             className="underline hover:text-yellow-400"
           >
-            Discord Community
+            Discord
           </a>{" "}
           or check our{" "}
           <a
@@ -106,7 +151,9 @@ const Dashboard = () => {
             GitHub
           </a>.
         </p>
-        <p className="mt-2 italic text-gray-600">v1.0 coming soon: formatter history, cloud sync & more!</p>
+        <p className="mt-2 italic text-gray-600">
+          v1.0 coming soon: snippet history, cloud sync & more!
+        </p>
       </footer>
     </div>
   );

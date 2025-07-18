@@ -7,16 +7,16 @@ function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar for medium and up */}
-      <div className="hidden md:block w-64 bg-gray-900">
+    <div className="flex h-screen bg-black text-white overflow-hidden">
+      {/* Sidebar for desktop */}
+      <div className="hidden md:block">
         <Sidebar />
       </div>
 
-      {/* Mobile Sidebar */}
+      {/* Sidebar for mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
-          <div className="w-64 bg-gray-900">
+          <div className="w-64 bg-black">
             <Sidebar closeSidebar={() => setSidebarOpen(false)} />
           </div>
           <div
@@ -26,8 +26,8 @@ function AppLayout() {
         </div>
       )}
 
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col w-0">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col w-0 bg-black">
         {/* Mobile top bar */}
         <div className="md:hidden p-4 flex justify-between items-center bg-gray-800 shadow">
           <button
@@ -39,11 +39,11 @@ function AppLayout() {
           <span className="text-white font-bold text-lg">Dexlify</span>
         </div>
 
-        {/* Desktop TopBar */}
-          <TopBar />
+        {/* Desktop top bar */}
+        <TopBar />
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-950 text-white">
+        <main className="flex-1 overflow-y-auto p-6 bg-black text-white">
           <Outlet />
         </main>
       </div>

@@ -37,12 +37,12 @@ export default function Sidebar({ closeSidebar }) {
           <Link
             key={to}
             to={to}
-            onClick={closeSidebar} // closes sidebar on mobile
+            onClick={closeSidebar}
             className={cn(
               "flex items-center gap-3 text-sm font-medium px-4 py-2 rounded-md transition-all",
               isActive
                 ? "bg-primary text-primary-foreground shadow"
-                : "hover:bg-primary/80 hover:text-black text-white bg-zinc-800"
+                : "bg-black text-white hover:bg-zinc-700"
             )}
           >
             {icon}
@@ -53,21 +53,6 @@ export default function Sidebar({ closeSidebar }) {
     </nav>
   );
 
-  const logoBlock = (
-    <div className="flex items-center justify-between px-4 py-3">
-      {!collapsed && (
-        <img
-          src="/assets/dexlify-logo-modern.png"
-          alt="Dexlify Logo"
-          className="w-36 object-contain drop-shadow"
-        />
-      )}
-      <button onClick={() => setCollapsed(!collapsed)} className="text-white">
-        {collapsed ? <ChevronRight /> : <ChevronLeft />}
-      </button>
-    </div>
-  );
-
   return (
     <aside
       className={cn(
@@ -75,17 +60,40 @@ export default function Sidebar({ closeSidebar }) {
         collapsed ? "w-20" : "w-64"
       )}
     >
-      {/* Top bar (logo & collapse) */}
-      <div className="flex justify-between items-center">
-        {logoBlock}
-        {/* Optional mobile close button */}
+      {/* Top Bar: Logo + Collapse + Mobile Close */}
+      <div className="flex items-center justify-between px-4 py-3">
+        {/* Logo + Collapse */}
+        <div className="flex items-center gap-2">
+          {!collapsed && (
+            <img
+              src="/assets/dexlify.png"
+              alt="Dexlify Logo"
+              className="w-36 object-contain drop-shadow"
+            />
+          )}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="text-white"
+          >
+            {collapsed ? <ChevronRight /> : <ChevronLeft />}
+          </button>
+        </div>
+
+        {/* Mobile Close Button */}
         {closeSidebar && (
-          <button onClick={closeSidebar} className="md:hidden text-white px-4">
+          <button
+            onClick={closeSidebar}
+            className="md:hidden text-white text-2xl font-bold"
+          >
             ✕
           </button>
         )}
       </div>
-      <div className="flex-1 overflow-y-auto px-2 py-2">{renderLinks()}</div>
+
+      {/* Navigation Links */}
+      <div className="flex-1 overflow-y-auto px-2 py-2">
+        {renderLinks()}
+      </div>
     </aside>
   );
 }

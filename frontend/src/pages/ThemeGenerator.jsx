@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CopyIcon, EyeIcon } from "lucide-react";
+import { toast } from "sonner"; // ✅ Import toast
 
 const themes = [
   {
@@ -89,8 +90,10 @@ const ThemeGenerator = () => {
   const [selected, setSelected] = useState(null);
 
   const copyToClipboard = () => {
-    if (selected)
+    if (selected) {
       navigator.clipboard.writeText(JSON.stringify(selected.colors, null, 2));
+      toast.success("🎉 Theme copied successfully!");
+    }
   };
 
   return (
@@ -101,7 +104,7 @@ const ThemeGenerator = () => {
       </p>
 
       {/* Theme Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {themes.map((theme) => (
           <div
             key={theme.name}
@@ -158,7 +161,7 @@ const ThemeGenerator = () => {
             Copy Theme as JSON
           </Button>
 
-          {/* Browser-style Live Preview */}
+          {/* Fake browser-style live preview */}
           <div
             className="rounded-md overflow-hidden shadow-lg border border-zinc-700 mt-8"
             style={{ backgroundColor: selected.colors.background }}
@@ -178,7 +181,7 @@ const ThemeGenerator = () => {
               <h3 className="text-xl font-semibold">Welcome to Dexlify!</h3>
               <p>This is how your website might look with this theme.</p>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex gap-3">
                 <button
                   className="px-4 py-2 rounded-md font-medium shadow"
                   style={{
