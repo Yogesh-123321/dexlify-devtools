@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 const useAuthStore = create((set) => {
+  // Load token and user from localStorage initially
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
@@ -9,6 +10,7 @@ const useAuthStore = create((set) => {
     user,
     token,
 
+    // ✅ Store full user object from backend (includes _id, name, email, etc.)
     login: (token, user) => {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
@@ -19,7 +21,7 @@ const useAuthStore = create((set) => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       set({ token: null, user: null });
-      window.location.reload(); // ✅ Page refresh on logout
+      window.location.reload(); // ✅ Ensures UI updates after logout
     },
   };
 });
