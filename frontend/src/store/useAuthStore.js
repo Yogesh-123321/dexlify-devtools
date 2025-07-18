@@ -1,14 +1,13 @@
 import { create } from "zustand";
 
 const useAuthStore = create((set) => {
-  // 🔄 Initialize from localStorage
-  const storedToken = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user");
-  const initialUser = storedUser ? JSON.parse(storedUser) : null;
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   return {
-    user: initialUser,
-    token: storedToken,
+    user,
+    token,
 
     login: (token, name) => {
       const user = { name };
@@ -21,6 +20,7 @@ const useAuthStore = create((set) => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       set({ token: null, user: null });
+      window.location.reload(); // ✅ Page refresh on logout
     },
   };
 });
