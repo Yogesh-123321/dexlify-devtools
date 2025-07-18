@@ -12,34 +12,26 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 router.post("/", detectUser, async (req, res) => {
   const { code } = req.body;
   const userId = req.userId;
+
   console.log("📥 Received code:", code, "| User ID:", userId);
 
   if (!code) return res.status(400).json({ error: "Code is required" });
 
-  // ✅ Guest limit check
-  if (userId === "guest") {
-    const guestCount = await Explanation.countDocuments({ user: null });
-    if (guestCount >= 2) {
-      return res.status(403).json({ error: "Guest trial limit reached. Please log in." });
-    }
-  }
-
   const python = spawn("python3", ["explain.py"], {
-  cwd: path.join(__dirname, ".."),
-});
+    cwd: path.join(__dirname, ".."),
+  });
 
-python.on("error", (err) => {
-  console.error("❌ Failed to start Python process:", err.message);
-  return res.status(500).json({ error: "Failed to start Python process" });
-});
-
+  python.on("error", (err) => {
+    console.error("❌ Failed to start Python process:", err.message);
+    return res.status(500).json({ error: "Failed to start Python process" });
+  });
 
   let result = "", error = "";
 
   python.stdout.on("data", (data) => (result += data.toString()));
   python.stderr.on("data", (data) => (error += data.toString()));
 
-  python.on("close", async (codeStatus) => {
+  python.on("close", async () => {
     if (error) {
       console.error("❌ Python error:", error);
       return res.status(500).json({ error: "Python script failed" });
