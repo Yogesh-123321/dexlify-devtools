@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { checkGuestLimit, getGuestUsage } from "@/lib/utils";
 import useAuthStore from "@/store/useAuthStore";
-import useExplainerStore from "@/store/useExplainerStore"; // ✅ Import
+import useExplainerStore from "@/store/useExplainerStore";
 import axios from "axios";
 
 const CodeExplainer = () => {
@@ -15,24 +15,26 @@ const CodeExplainer = () => {
   const [guestCount, setGuestCount] = useState(0);
 
   const user = useAuthStore((state) => state.user);
-
-  // ✅ Get history and setter from store
-  const history = useExplainerStore((state) => state.history);
-  const setHistory = useExplainerStore((state) => state.setHistory);
+  const { explanations, addExplanation, resetExplanations } = useExplainerStore();
 
   useEffect(() => {
+    fetchHistory();
+
     if (!user) {
       const { count } = getGuestUsage("codeExplainerUsage");
       setGuestCount(count);
     } else {
-      fetchHistory();
+      resetExplanations(); // Clear previous user's data
     }
   }, [user]);
 
   const fetchHistory = async () => {
+    if (!user) return;
     try {
       const res = await axios.get("https://dexlify-devtools.onrender.com/api/explainer");
-      setHistory(res.data); // ✅ Store history in global store
+      if (Array.isArray(res.data)) {
+        useExplainerStore.setState({ explanations: res.data });
+      }
     } catch (err) {
       console.error("Failed to fetch explanation history:", err.message);
     }
@@ -62,9 +64,14 @@ const CodeExplainer = () => {
         code,
       });
 
-      setExplanation(res.data.explanation || "No explanation returned.");
+      const result = {
+        code,
+        explanation: res.data.explanation || "No explanation returned.",
+      };
+
+      setExplanation(result.explanation);
+      addExplanation(result); // Add to store
       toast.success("✅ Explanation generated!");
-      fetchHistory(); // ✅ Refetch from backend
     } catch (err) {
       console.error(err);
       toast.error("❌ Failed to explain the code.");
@@ -133,11 +140,11 @@ const CodeExplainer = () => {
       )}
 
       {/* History Section */}
-      {history.length > 0 && (
+      {Array.isArray(explanations) && explanations.length > 0 && (
         <Card className="bg-gray-900 text-white">
           <CardContent className="p-4 space-y-4">
             <h2 className="text-lg font-semibold">📜 Your Explanation History</h2>
-            {history.map((item, idx) => (
+            {explanations.map((item, idx) => (
               <div
                 key={idx}
                 className="border border-gray-700 rounded p-3 space-y-2 bg-gray-800"
