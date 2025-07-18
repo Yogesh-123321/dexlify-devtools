@@ -5,38 +5,41 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { checkGuestLimit, getGuestUsage } from "@/lib/utils";
 import useAuthStore from "@/store/useAuthStore";
-import useExplainerStore from "@/store/useExplainerStore";
 import axios from "axios";
 
 const CodeExplainer = () => {
   const [code, setCode] = useState("");
   const [explanation, setExplanation] = useState("");
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
 
   const user = useAuthStore((state) => state.user);
-  const { explanations, addExplanation, resetExplanations } = useExplainerStore();
+  const token = useAuthStore((state) => state.token);
 
+  // Fetch history on load
   useEffect(() => {
-    fetchHistory();
-
-    if (!user) {
+    if (user && token) {
+      fetchHistory();
+    } else {
       const { count } = getGuestUsage("codeExplainerUsage");
       setGuestCount(count);
-    } else {
-      resetExplanations(); // Clear previous user's data
     }
-  }, [user]);
+  }, [user, token]);
 
   const fetchHistory = async () => {
-    if (!user) return;
     try {
-      const res = await axios.get("https://dexlify-devtools.onrender.com/api/explainer");
-      if (Array.isArray(res.data)) {
-        useExplainerStore.setState({ explanations: res.data });
-      }
+      const res = await axios.get("https://dexlify-devtools.onrender.com/api/explainer", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setHistory(res.data);
     } catch (err) {
       console.error("Failed to fetch explanation history:", err.message);
+      if (err.response?.status === 403) {
+        toast.error("⚠️ Login required to fetch history. Please log in again.");
+      }
     }
   };
 
@@ -60,18 +63,20 @@ const CodeExplainer = () => {
     setExplanation("");
 
     try {
-      const res = await axios.post("https://dexlify-devtools.onrender.com/api/explainer", {
-        code,
-      });
+      const res = await axios.post(
+        "https://dexlify-devtools.onrender.com/api/explainer",
+        { code },
+        user
+          ? { headers: { Authorization: `Bearer ${token}` } }
+          : undefined
+      );
 
-      const result = {
-        code,
-        explanation: res.data.explanation || "No explanation returned.",
-      };
-
-      setExplanation(result.explanation);
-      addExplanation(result); // Add to store
+      setExplanation(res.data.explanation || "No explanation returned.");
       toast.success("✅ Explanation generated!");
+
+      if (user) {
+        fetchHistory();
+      }
     } catch (err) {
       console.error(err);
       toast.error("❌ Failed to explain the code.");
@@ -140,11 +145,11 @@ const CodeExplainer = () => {
       )}
 
       {/* History Section */}
-      {Array.isArray(explanations) && explanations.length > 0 && (
+      {user && history.length > 0 && (
         <Card className="bg-gray-900 text-white">
           <CardContent className="p-4 space-y-4">
             <h2 className="text-lg font-semibold">📜 Your Explanation History</h2>
-            {explanations.map((item, idx) => (
+            {history.map((item, idx) => (
               <div
                 key={idx}
                 className="border border-gray-700 rounded p-3 space-y-2 bg-gray-800"
