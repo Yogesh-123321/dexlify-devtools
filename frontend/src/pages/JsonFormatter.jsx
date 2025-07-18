@@ -58,6 +58,11 @@ const JsonFormatter = () => {
   };
 
   const handleFormat = () => {
+    if (!input.trim()) {
+      toast.error("❌ Input is empty!");
+      return;
+    }
+
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
       toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
       return;
@@ -67,7 +72,7 @@ const JsonFormatter = () => {
       const parsed = JSON.parse(input);
       const pretty = JSON.stringify(parsed, null, 2);
       setOutput(pretty);
-      saveToHistory(pretty, "format");
+      saveToHistory(pretty, "beautify"); // ✅ FIXED: "beautify" instead of "format"
       toast.success("✨ JSON formatted!");
     } catch (err) {
       toast.error("❌ Invalid JSON. Please check your syntax.");
@@ -75,6 +80,11 @@ const JsonFormatter = () => {
   };
 
   const handleMinify = () => {
+    if (!input.trim()) {
+      toast.error("❌ Input is empty!");
+      return;
+    }
+
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
       toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
       return;
