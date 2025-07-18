@@ -3,67 +3,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import axios from "axios";
 import useAuthStore from "@/store/useAuthStore";
 import {
   checkGuestLimit,
   getGuestUsage,
-  getOrCreateGuestId,
 } from "@/lib/utils";
 
 const JsonFormatter = () => {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [history, setHistory] = useState([]);
   const [guestCount, setGuestCount] = useState(0);
 
   const { user, token } = useAuthStore();
 
-  // 🧠 Fetch history only after user/token is ready
   useEffect(() => {
-    if (user || token) {
-      fetchHistory();
-    }
-
     if (!token) {
       const { count } = getGuestUsage("jsonFormatterUsage");
       setGuestCount(count);
     }
-  }, [user, token]);
-
-  const fetchHistory = async () => {
-    try {
-      const userId = user?.userId || getOrCreateGuestId();
-      const res = await axios.get(
-        `https://dexlify-devtools.onrender.com/api/jsonformatter?user=${userId}`
-      );
-      setHistory(res.data || []);
-    } catch (err) {
-      console.error("❌ Failed to fetch history:", err.message);
-    }
-  };
-
-  const saveToHistory = async (formatted, mode) => {
-    try {
-      const userId = user?.userId || "guest";
-      await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
-        input,
-        output: formatted,
-        mode,
-        userId,
-      });
-      fetchHistory(); // refresh history
-    } catch (err) {
-      console.error("❌ History save error:", err.message);
-      toast.error("❌ Failed to save history.");
-    }
-  };
+  }, [token]);
 
   const handleFormat = () => {
-    if (!input.trim()) return toast.error("❌ Input is empty!");
-
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
-      return toast.error("🚫 Guest limit reached. Please sign up to continue.");
+      toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
+      return;
     }
 
     try {
@@ -71,17 +34,15 @@ const JsonFormatter = () => {
       const pretty = JSON.stringify(parsed, null, 2);
       setOutput(pretty);
       toast.success("✨ JSON formatted!");
-      saveToHistory(pretty, "format");
     } catch (err) {
       toast.error("❌ Invalid JSON. Please check your syntax.");
     }
   };
 
   const handleMinify = () => {
-    if (!input.trim()) return toast.error("❌ Input is empty!");
-
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
-      return toast.error("🚫 Guest limit reached. Please sign up to continue.");
+      toast.error("🚫 Guest limit reached. Please sign up to minify more JSON.");
+      return;
     }
 
     try {
@@ -89,7 +50,6 @@ const JsonFormatter = () => {
       const minified = JSON.stringify(parsed);
       setOutput(minified);
       toast.success("📦 JSON minified!");
-      saveToHistory(minified, "minify");
     } catch (err) {
       toast.error("❌ Invalid JSON. Please check your syntax.");
     }
@@ -120,16 +80,16 @@ const JsonFormatter = () => {
             onChange={(e) => setInput(e.target.value)}
             className="bg-gray-800 text-white"
           />
-          <div className="flex gap-3 flex-wrap items-center">
+          <div className="flex gap-3 flex-wrap">
             <Button onClick={handleFormat}>✨ Format</Button>
             <Button onClick={handleMinify}>📦 Minify</Button>
             <Button onClick={handleReset}>🔄 Reset</Button>
-            {!token && (
-              <span className="text-sm text-gray-400">
-                Guest usage: {guestCount}/2
-              </span>
-            )}
           </div>
+          {!token && (
+            <p className="text-sm text-gray-400">
+              Guest usage: {guestCount}/2
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -149,27 +109,6 @@ const JsonFormatter = () => {
               rows={10}
               className="bg-gray-900 text-green-400 font-mono"
             />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* History */}
-      {history.length > 0 && (
-        <Card className="bg-gray-900 text-white">
-          <CardContent className="p-4 space-y-4">
-            <h3 className="text-lg font-semibold">📚 JSON History</h3>
-            {history.map((entry, idx) => (
-              <div
-                key={idx}
-                className="bg-gray-800 p-3 rounded text-sm overflow-auto whitespace-pre-wrap border border-gray-700"
-              >
-                <p className="text-xs text-gray-400 mb-1">
-                  Mode: {entry.mode} | Date:{" "}
-                  {new Date(entry.createdAt).toLocaleString()}
-                </p>
-                <pre>{entry.output}</pre>
-              </div>
-            ))}
           </CardContent>
         </Card>
       )}
