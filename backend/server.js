@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5500;
 
 app.use(cors({
-  origin: "https://dexlify-frontend.onrender.com/",
+  origin: "https://dexlify-frontend.onrender.com",
   credentials: true,
 }));
 
