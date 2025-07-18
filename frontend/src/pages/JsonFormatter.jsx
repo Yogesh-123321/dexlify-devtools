@@ -20,17 +20,21 @@ const JsonFormatter = () => {
   const { user, token } = useAuthStore();
 
   useEffect(() => {
-    fetchHistory();
+    if (user || token !== null) {
+      fetchHistory();
+    }
 
-    if (!token) {
+    if (!user && !token) {
       const { count } = getGuestUsage("jsonFormatterUsage");
       setGuestCount(count);
     }
-  }, [token]);
+  }, [user, token]);
 
   const fetchHistory = async () => {
     try {
-      const userId = user ? user._id : getOrCreateGuestId();
+      const userId = user?._id || getOrCreateGuestId();
+      if (!userId) return;
+
       const res = await axios.get(
         `https://dexlify-devtools.onrender.com/api/jsonformatter?user=${userId}`
       );
@@ -42,7 +46,7 @@ const JsonFormatter = () => {
 
   const saveToHistory = async (formatted, mode) => {
     try {
-      const userId = user ? user._id : "guest";
+      const userId = user?._id || "guest";
 
       await axios.post("https://dexlify-devtools.onrender.com/api/jsonformatter", {
         input,
@@ -58,11 +62,6 @@ const JsonFormatter = () => {
   };
 
   const handleFormat = () => {
-    if (!input.trim()) {
-      toast.error("❌ Input is empty!");
-      return;
-    }
-
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
       toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
       return;
@@ -72,19 +71,14 @@ const JsonFormatter = () => {
       const parsed = JSON.parse(input);
       const pretty = JSON.stringify(parsed, null, 2);
       setOutput(pretty);
-      saveToHistory(pretty, "beautify"); // ✅ FIXED: "beautify" instead of "format"
+      saveToHistory(pretty, "beautify");
       toast.success("✨ JSON formatted!");
-    } catch (err) {
+    } catch {
       toast.error("❌ Invalid JSON. Please check your syntax.");
     }
   };
 
   const handleMinify = () => {
-    if (!input.trim()) {
-      toast.error("❌ Input is empty!");
-      return;
-    }
-
     if (!user && !checkGuestLimit("jsonFormatterUsage")) {
       toast.error("🚫 Guest limit reached. Please sign up to format more JSON.");
       return;
@@ -96,7 +90,7 @@ const JsonFormatter = () => {
       setOutput(minified);
       saveToHistory(minified, "minify");
       toast.success("📦 JSON minified!");
-    } catch (err) {
+    } catch {
       toast.error("❌ Invalid JSON. Please check your syntax.");
     }
   };
@@ -126,16 +120,16 @@ const JsonFormatter = () => {
             onChange={(e) => setInput(e.target.value)}
             className="bg-gray-800 text-white"
           />
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-3 flex-wrap items-center">
             <Button onClick={handleFormat}>✨ Format</Button>
             <Button onClick={handleMinify}>📦 Minify</Button>
             <Button onClick={handleReset}>🔄 Reset</Button>
+            {!user && (
+              <span className="text-sm text-gray-400">
+                Guest usage: {guestCount}/2
+              </span>
+            )}
           </div>
-          {!token && (
-            <p className="text-sm text-gray-400">
-              Guest usage: {guestCount}/2
-            </p>
-          )}
         </CardContent>
       </Card>
 
@@ -145,9 +139,7 @@ const JsonFormatter = () => {
           <CardContent className="p-4 space-y-3">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">🧾 Output</h3>
-              <Button onClick={handleCopy} className="text-sm">
-                📋 Copy
-              </Button>
+              <Button onClick={handleCopy} className="text-sm">📋 Copy</Button>
             </div>
             <Textarea
               value={output}
@@ -170,7 +162,7 @@ const JsonFormatter = () => {
                 className="bg-gray-800 p-3 rounded text-sm overflow-auto whitespace-pre-wrap border border-gray-700"
               >
                 <p className="text-xs text-gray-400 mb-1">
-                  Mode: {entry.mode} | Date: {new Date(entry.createdAt).toLocaleString()}
+                  Mode: {entry.mode} | {new Date(entry.createdAt).toLocaleString()}
                 </p>
                 <pre>{entry.output}</pre>
               </div>
