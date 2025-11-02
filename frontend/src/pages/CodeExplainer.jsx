@@ -17,6 +17,9 @@ const CodeExplainer = () => {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
 
+  // ✅ Change this baseURL when switching between localhost and hosted version
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5500";
+
   // Fetch history on load
   useEffect(() => {
     if (user && token) {
@@ -29,7 +32,7 @@ const CodeExplainer = () => {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get("https://dexlify-devtools.onrender.com/api/explainer", {
+      const res = await axios.get(`${BASE_URL}/api/explainer`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -64,7 +67,7 @@ const CodeExplainer = () => {
 
     try {
       const res = await axios.post(
-        "https://dexlify-devtools.onrender.com/api/explainer",
+        `${BASE_URL}/api/explainer`,
         { code },
         user
           ? { headers: { Authorization: `Bearer ${token}` } }

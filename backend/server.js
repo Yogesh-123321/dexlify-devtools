@@ -13,10 +13,17 @@ import authRoutes from "./routes/authRoute.js";
 const app = express();
 const PORT = process.env.PORT || 5500;
 
-app.use(cors({
-  origin: "https://dexlify-frontend.onrender.com",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",                // ✅ Local testing
+      "https://dexlify-frontend.onrender.com" // ✅ Production frontend
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
+
 
 app.use(express.json());
 
