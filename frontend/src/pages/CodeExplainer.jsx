@@ -18,7 +18,7 @@ const CodeExplainer = () => {
   const token = useAuthStore((state) => state.token);
 
   // ✅ Change this baseURL when switching between localhost and hosted version
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5500";
+  const BASE_URL = "https://dexlify-devtools.onrender.com";
 
   // Fetch history on load
   useEffect(() => {
