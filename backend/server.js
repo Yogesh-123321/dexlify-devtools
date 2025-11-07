@@ -12,7 +12,7 @@ import authRoutes from "./routes/authRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 5500;
-
+app.use(express.json());
 app.use(
   cors({
     origin: [
@@ -27,7 +27,7 @@ app.use(
 );
 
 app.options("*", cors());
-app.use(express.json());
+
 
 app.use("/api/snippets", snippetRoutes);
 app.use("/api/explainer", explainerRoute);
