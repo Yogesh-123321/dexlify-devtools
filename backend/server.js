@@ -20,6 +20,7 @@ app.use(
       "https://dexlify-frontend.onrender.com" // ✅ Production frontend
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"], // ✅ This was missing!
     credentials: true,
   })
 );
