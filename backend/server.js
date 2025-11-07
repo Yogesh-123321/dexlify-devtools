@@ -26,9 +26,6 @@ app.use(
   })
 );
 
-app.options("*", cors());
-
-
 app.use("/api/snippets", snippetRoutes);
 app.use("/api/explainer", explainerRoute);
 app.use("/api/jsonformatter", jsonFormatterRoutes);
