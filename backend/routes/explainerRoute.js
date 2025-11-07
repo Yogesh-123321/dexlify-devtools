@@ -16,7 +16,7 @@ router.post("/", detectUser, async (req, res) => {
     const response = await axios.post(
   "https://openrouter.ai/api/v1/chat/completions",
   {
-    model: "deepseek/deepseek-chat-v3-0324:free",
+    model: "google/gemini-embedding-001",
     messages: [
       {
         role: "system",
