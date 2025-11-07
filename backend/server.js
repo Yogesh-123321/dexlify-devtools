@@ -20,12 +20,13 @@ app.use(
       "https://dexlify-frontend.onrender.com" // ✅ Production frontend
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"], // ✅ This was missing!
+    allowedHeaders: ["Content-Type", "Authorization", "x-guest-id"], // ✅ required
+    exposedHeaders: ["x-guest-id"], // ✅ This was missing!
     credentials: true,
   })
 );
 
-
+app.options("*", cors());
 app.use(express.json());
 
 app.use("/api/snippets", snippetRoutes);
